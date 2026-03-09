@@ -1,2 +1,5 @@
 # dfake-models
-Repo for modeling
+Repo for models
+
+## Requirements
+python version 3.12.9
