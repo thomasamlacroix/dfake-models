@@ -13,11 +13,13 @@ from dfake.params import *
 from dfake.dl_logic.model import initialize_model, compile_model, train_model, evaluate_model
 from dfake.dl_logic.registry import load_model, save_model, save_results
 
+from google.cloud import storage
+
 
 def train(learning_rate=LEARNING_RATE,
           batch_size=BATCH_SIZE,
           patience=PATIENCE
-          )
+          ):
     """
     - Get data from GCP bucket or local folder
     - Train model
@@ -27,6 +29,10 @@ def train(learning_rate=LEARNING_RATE,
     print("\n⭐️ Use case: train")
     print("\nLoading preprocessed validation data...")
 
+
+    # client = storage.Client()
+    # bucket = client.bucket(BUCKET_NAME)
+    # blob = bucket.blob(f"models/{model_filename}")
     #Lightweight dataset
     train_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "train")
     val_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "valid")

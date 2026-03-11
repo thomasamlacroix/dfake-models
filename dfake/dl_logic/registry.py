@@ -8,17 +8,14 @@ import joblib
 from google.cloud import storage
 
 import mlflow
-from mlflow.tracking import MlflowClient
+# from mlflow.tracking import MlflowClient
 
 from dfake.params import *
 
 
 def save_results(params, metrics) -> None:
     """
-    Persist params & metrics locally on the hard drive at
-    "{LOCAL_REGISTRY_PATH}/params/{current_timestamp}.pickle"
-    "{LOCAL_REGISTRY_PATH}/metrics/{current_timestamp}.pickle"
-    - (unit 03 only) if MODEL_TARGET='mlflow', also persist them on MLflow
+    Persist params & metrics on MLflow
     """
     #Saving to MLflow
     if params is not None:
@@ -28,21 +25,6 @@ def save_results(params, metrics) -> None:
 
     print("✅ Results saved on MLflow")
 
-    # timestamp = time.strftime("%Y%m%d-%H%M%S")
-
-    # # Save params locally
-    # if params is not None:
-    #     params_path = os.path.join(LOCAL_REGISTRY_PATH, "params", timestamp + ".pickle")
-    #     with open(params_path, "wb") as file:
-    #         pickle.dump(params, file)
-
-    # # Save metrics locally
-    # if metrics is not None:
-    #     metrics_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", timestamp + ".pickle")
-    #     with open(metrics_path, "wb") as file:
-    #         pickle.dump(metrics, file)
-
-    # print("✅ Results saved locally")
 
 
 def save_model(model=None):
@@ -54,23 +36,20 @@ def save_model(model=None):
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-    # Save model locally
+    # # Save model locally
     model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.joblib")
-    model.save(model_path)
+    # model.save(model_path)
 
-    print("✅ Model saved locally")
+    # print("✅ Model saved locally")
 
     if MODEL_TARGET == "gcs":
-        # 🎁 We give you this piece of code as a gift. Please read it carefully! Add a breakpoint if needed!
-
-        model_filename = model_path.split("/")[-1] # e.g. "20230208-161047.h5" for instance
+        model_filename = model_path.split("/")[-1] # e.g. "20230208-161047.joblib" for instance
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"models/{model_filename}")
         blob.upload_from_filename(model_path)
 
         print("✅ Model saved to GCS")
-
         return None
 
     #Saving model to MLflow
@@ -84,37 +63,36 @@ def save_model(model=None):
     return None
 
 
-def load_model(stage="Production"):
+def load_model():
     """
     Return a saved model:
     - locally (latest one in alphabetical order)
     - or from GCS (most recent one) if MODEL_TARGET=='gcs'
 
     Return None (but do not Raise) if no model is found
-
     """
 
-    if MODEL_TARGET == "local":
-        print(f"\nLoad latest model from local registry...")
+    # if MODEL_TARGET == "local":
+    #     print(f"\nLoad latest model from local registry...")
 
-        # Get the latest model version name by the timestamp on disk
-        local_model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
-        local_model_paths = glob.glob(f"{local_model_directory}/*")
+    #     # Get the latest model version name by the timestamp on disk
+    #     local_model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
+    #     local_model_paths = glob.glob(f"{local_model_directory}/*")
 
-        if not local_model_paths:
-            return None
+    #     if not local_model_paths:
+    #         return None
 
-        most_recent_model_path_on_disk = sorted(local_model_paths)[-1]
+    #     most_recent_model_path_on_disk = sorted(local_model_paths)[-1]
 
-        print(f"\nLoad latest model from disk...")
+    #     print(f"\nLoad latest model from disk...")
 
-        latest_model = joblib.load(most_recent_model_path_on_disk)
+    #     latest_model = joblib.load(most_recent_model_path_on_disk)
 
-        print("✅ Model loaded from local disk")
+    #     print("✅ Model loaded from local disk")
 
-        return latest_model
+    #     return latest_model
 
-    elif MODEL_TARGET == "gcs":
+    if MODEL_TARGET == "gcs":
         print(f"\nLoad latest model from GCS...")
 
         client = storage.Client()
@@ -138,33 +116,6 @@ def load_model(stage="Production"):
     else:
         return None
 
-
-
-# def mlflow_transition_model(current_stage: str, new_stage: str) -> None:
-#     """
-#     Transition the latest model from the `current_stage` to the
-#     `new_stage` and archive the existing model in `new_stage`
-#     """
-#     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-
-#     client = MlflowClient()
-
-#     version = client.get_latest_versions(name=MLFLOW_MODEL_NAME, stages=[current_stage])
-
-#     if not version:
-#         print(f"\n❌ No model found with name {MLFLOW_MODEL_NAME} in stage {current_stage}")
-#         return None
-
-#     client.transition_model_version_stage(
-#         name=MLFLOW_MODEL_NAME,
-#         version=version[0].version,
-#         stage=new_stage,
-#         archive_existing_versions=True
-#     )
-
-#     print(f"✅ Model {MLFLOW_MODEL_NAME} (version {version[0].version}) transitioned from {current_stage} to {new_stage}")
-
-#     return None
 
 
 def mlflow_run(func):
