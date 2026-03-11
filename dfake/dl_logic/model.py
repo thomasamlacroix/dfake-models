@@ -97,3 +97,39 @@ def train_model(
                     verbose=1)
 
     print(f"✅ Model trained")
+
+    return model, history
+
+
+def evaluate_model(model,
+                   test_ds,
+                   batch_size=128
+                   ):
+    """
+    Evaluate trained model performance on the dataset
+    """
+
+    print("\nEvaluating model...")
+
+    if model is None:
+        print(f"\n❌ No model to evaluate")
+        return None
+
+    evaluation = model.evaluate(
+        test_ds,
+        batch_size=batch_size,
+        verbose=0,
+        # callbacks=None,
+        return_dict=True
+        )
+
+    accuracy = evaluation["accuracy"]
+    recall = evaluation["recall"]
+    precision = evaluation["precision"]
+
+    print("✅ Model evaluated")
+    print(f"Accuracy: {round(accuracy, 2)}")
+    print(f"Recall: {round(recall, 2)}")
+    print(f"Precision: {round(precision, 2)}")
+
+    return evaluation
