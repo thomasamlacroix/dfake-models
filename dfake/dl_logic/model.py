@@ -1,10 +1,7 @@
 from keras.models import Model
 from keras import Sequential, Input, layers, optimizers, callbacks
 
-from keras.utils import image_dataset_from_directory
 
-#Pretrained model for transfer learning
-from keras.applications.efficientnet import EfficientNetB3, preprocess_input
 
 
 def data_augmentation():
@@ -19,7 +16,7 @@ def data_augmentation():
     return data_augmentation
 
 
-def initialize_model(input_shape, base_model):
+def initialize_model(input_shape, base_model, preprocess_input):
     """
     Initialize the Neural Network with random weights
     """

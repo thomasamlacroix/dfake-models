@@ -18,7 +18,15 @@ MLFLOW_MODEL_NAME = os.environ.get("MLFLOW_MODEL_NAME")
 LOCAL_DATA_PATH = os.path.join(os.path.expanduser('..'), "data")
 LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('..'), "training_outputs")
 
-
+BATCH_SIZE = 128
+IMAGE_SIZE = (256, 256)
+IMAGE_HEIGHT = IMAGE_SIZE[0]
+IMAGE_WIDTH = IMAGE_SIZE[1]
+NUM_CHANNELS = 3
+SEED = 42
+LEARNING_RATE = 0.001
+PATIENCE = 5
+EPOCHS = 20
 
 
 
@@ -27,7 +35,7 @@ LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('..'), "training_outputs"
 
 env_valid_options = dict(
     DATA_SIZE=["lightweight", "all"],
-    MODEL_TARGET=["local", "gcs", "mlflow"],
+    MODEL_TARGET=["local", "gcs"],   #, "mlflow"],
 )
 
 def validate_env_value(env, valid_options):

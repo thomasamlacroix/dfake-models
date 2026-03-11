@@ -4,53 +4,96 @@
 from pathlib import Path
 # from colorama import Fore, Style
 
+from keras.utils import image_dataset_from_directory
+
+#Pretrained model for transfer learning
+from keras.applications.efficientnet import EfficientNetB3, preprocess_input
 
 from dfake.params import *
 from dfake.dl_logic.model import initialize_model, compile_model, train_model, evaluate_model
 from dfake.dl_logic.registry import load_model, save_model, save_results
 
 
-def train(learning_rate=0.001,
-          batch_size = 256,
-          patience = 2
-          ) -> float:
+def train(learning_rate=LEARNING_RATE,
+          batch_size=BATCH_SIZE,
+          patience=PATIENCE
+          )
     """
-
+    - Get data from GCP bucket or local folder
+    - Train model
+    - Store training results and model weights
     """
 
     print("\n⭐️ Use case: train")
     print("\nLoading preprocessed validation data...")
 
+    #Lightweight dataset
+    train_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "train")
+    val_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "valid")
+    test_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "test")
+
 
     #Load data
+    train_ds = image_dataset_from_directory(
+    train_data_dir,
+    labels="inferred",
+    label_mode="binary",
+    seed=SEED,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE)
 
+
+    val_ds = image_dataset_from_directory(
+    val_data_dir,
+    labels="inferred",
+    label_mode="binary",
+    seed=SEED,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE)
+
+    test_ds = image_dataset_from_directory(
+    test_data_dir,
+    labels="inferred",
+    label_mode="binary",
+    seed=SEED,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE)
 
 
     # Train model using `model.py`
-    model = initialize_model(input_shape=X_train_processed.shape[1])
+    input_shape = (IMAGE_HEIGHT, IMAGE_WIDTH, NUM_CHANNELS)
+
+    base_model = EfficientNetB3(weights="imagenet",
+                                include_top=False,
+                                input_shape=input_shape)
+
+    model = initialize_model(input_shape, base_model, preprocess_input)
 
     model = compile_model(model, learning_rate=learning_rate)
 
     model, history = train_model(model,
-                                 X_train_processed,
-                                 y_train,
+                                 train_ds,
                                  batch_size=batch_size,
                                  patience=patience,
-                                 validation_data=(X_val_processed, y_val)
+                                 validation_data=val_ds
                                  )
 
-    val_mae = np.min(history.history['val_mae'])
+
+    val_accuracy = history.history['accuracy']
+    val_recall = history.history['recall']
+    val_precision = history.history['precision']
 
     params = dict(
         context="train",
-        training_set_size=DATA_SIZE,
-        row_count=len(X_train_processed),
+        training_set_size=DATA_SIZE
     )
 
-    # Save results on the hard drive using taxifare.ml_logic.registry
-    save_results(params=params, metrics=dict(mae=val_mae))
+    # Save results on the hard drive using dfake.ml_logic.registry
+    save_results(params=params, metrics=dict(accuracy=val_accuracy,
+                                             recall=val_recall,
+                                             precision=val_precision))
 
-    # Save model weight on the hard drive (and optionally on GCS too!)
+    # Save model weight on the hard drive and on GCS
     save_model(model=model)
 
     print("✅ train() done \n")
@@ -64,24 +107,13 @@ def evaluate(
         stage: str = "Production"
     ) -> float:
     """
-    Evaluate the performance of the latest production model on processed data
-    Return MAE as a float
+    Evaluate the performance of the model on test data
+    Return accuracy, recall and precision as floats
     """
-    print(Fore.MAGENTA + "\n⭐️ Use case: evaluate" + Style.RESET_ALL)
+    print("\n⭐️ Use case: evaluate")
 
     model = load_model(stage=stage)
     assert model is not None
-
-    min_date = parse(min_date).strftime('%Y-%m-%d') # e.g '2009-01-01'
-    max_date = parse(max_date).strftime('%Y-%m-%d') # e.g '2009-01-01'
-
-    # Query your BigQuery processed table and get data_processed using `get_data_with_cache`
-    query = f"""
-        SELECT *
-        FROM {GCP_PROJECT}.{BQ_DATASET}.processed_{DATA_SIZE}
-        WHERE pickup_datetime BETWEEN '{min_date}' AND '{max_date}'
-        ORDER BY pickup_datetime
-        """
 
     # Retrieve `query` data from BigQuery or from `data_query_cache_path` if the file already exists!
     data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("processed", f"query_{min_date}_{max_date}_{DATA_SIZE}.csv")
