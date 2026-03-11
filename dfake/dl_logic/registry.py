@@ -3,6 +3,8 @@ import os
 import time
 import pickle
 
+import joblib
+
 from google.cloud import storage
 
 import mlflow
@@ -18,42 +20,42 @@ def save_results(params, metrics) -> None:
     "{LOCAL_REGISTRY_PATH}/metrics/{current_timestamp}.pickle"
     - (unit 03 only) if MODEL_TARGET='mlflow', also persist them on MLflow
     """
-    if MODEL_TARGET == "mlflow":
-        if params is not None:
-            mlflow.log_params(params)
-        if metrics is not None:
-            mlflow.log_metrics(metrics)
-
-        print("✅ Results saved on MLflow")
-
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-
-    # Save params locally
+    #Saving to MLflow
     if params is not None:
-        params_path = os.path.join(LOCAL_REGISTRY_PATH, "params", timestamp + ".pickle")
-        with open(params_path, "wb") as file:
-            pickle.dump(params, file)
-
-    # Save metrics locally
+        mlflow.log_params(params)
     if metrics is not None:
-        metrics_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", timestamp + ".pickle")
-        with open(metrics_path, "wb") as file:
-            pickle.dump(metrics, file)
+        mlflow.log_metrics(metrics)
 
-    print("✅ Results saved locally")
+    print("✅ Results saved on MLflow")
+
+    # timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+    # # Save params locally
+    # if params is not None:
+    #     params_path = os.path.join(LOCAL_REGISTRY_PATH, "params", timestamp + ".pickle")
+    #     with open(params_path, "wb") as file:
+    #         pickle.dump(params, file)
+
+    # # Save metrics locally
+    # if metrics is not None:
+    #     metrics_path = os.path.join(LOCAL_REGISTRY_PATH, "metrics", timestamp + ".pickle")
+    #     with open(metrics_path, "wb") as file:
+    #         pickle.dump(metrics, file)
+
+    # print("✅ Results saved locally")
 
 
 def save_model(model=None):
     """
-    Persist trained model locally on the hard drive at f"{LOCAL_REGISTRY_PATH}/models/{timestamp}.h5"
-    - if MODEL_TARGET='gcs', also persist it in your bucket on GCS at "models/{timestamp}.h5"
+    Persist trained model locally on the hard drive at f"{LOCAL_REGISTRY_PATH}/models/{timestamp}.joblib"
+    - if MODEL_TARGET='gcs', also persist it in your bucket on GCS at "models/{timestamp}.joblib"
     - Also persist it on MLflow
     """
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
     # Save model locally
-    model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.h5")
+    model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.joblib")
     model.save(model_path)
 
     print("✅ Model saved locally")
@@ -106,15 +108,14 @@ def load_model(stage="Production"):
 
         print(f"\nLoad latest model from disk...")
 
-        latest_model = keras.models.load_model(most_recent_model_path_on_disk)
+        latest_model = joblib.load(most_recent_model_path_on_disk)
 
         print("✅ Model loaded from local disk")
 
         return latest_model
 
     elif MODEL_TARGET == "gcs":
-        # 🎁 We give you this piece of code as a gift. Please read it carefully! Add a breakpoint if needed!
-        print(Fore.BLUE + f"\nLoad latest model from GCS..." + Style.RESET_ALL)
+        print(f"\nLoad latest model from GCS...")
 
         client = storage.Client()
         blobs = list(client.get_bucket(BUCKET_NAME).list_blobs(prefix="model"))
@@ -124,7 +125,7 @@ def load_model(stage="Production"):
             latest_model_path_to_save = os.path.join(LOCAL_REGISTRY_PATH, latest_blob.name)
             latest_blob.download_to_filename(latest_model_path_to_save)
 
-            latest_model = keras.models.load_model(latest_model_path_to_save)
+            latest_model = joblib.load(latest_model_path_to_save)
 
             print("✅ Latest model downloaded from cloud storage")
 
@@ -139,31 +140,31 @@ def load_model(stage="Production"):
 
 
 
-def mlflow_transition_model(current_stage: str, new_stage: str) -> None:
-    """
-    Transition the latest model from the `current_stage` to the
-    `new_stage` and archive the existing model in `new_stage`
-    """
-    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+# def mlflow_transition_model(current_stage: str, new_stage: str) -> None:
+#     """
+#     Transition the latest model from the `current_stage` to the
+#     `new_stage` and archive the existing model in `new_stage`
+#     """
+#     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
-    client = MlflowClient()
+#     client = MlflowClient()
 
-    version = client.get_latest_versions(name=MLFLOW_MODEL_NAME, stages=[current_stage])
+#     version = client.get_latest_versions(name=MLFLOW_MODEL_NAME, stages=[current_stage])
 
-    if not version:
-        print(f"\n❌ No model found with name {MLFLOW_MODEL_NAME} in stage {current_stage}")
-        return None
+#     if not version:
+#         print(f"\n❌ No model found with name {MLFLOW_MODEL_NAME} in stage {current_stage}")
+#         return None
 
-    client.transition_model_version_stage(
-        name=MLFLOW_MODEL_NAME,
-        version=version[0].version,
-        stage=new_stage,
-        archive_existing_versions=True
-    )
+#     client.transition_model_version_stage(
+#         name=MLFLOW_MODEL_NAME,
+#         version=version[0].version,
+#         stage=new_stage,
+#         archive_existing_versions=True
+#     )
 
-    print(f"✅ Model {MLFLOW_MODEL_NAME} (version {version[0].version}) transitioned from {current_stage} to {new_stage}")
+#     print(f"✅ Model {MLFLOW_MODEL_NAME} (version {version[0].version}) transitioned from {current_stage} to {new_stage}")
 
-    return None
+#     return None
 
 
 def mlflow_run(func):
