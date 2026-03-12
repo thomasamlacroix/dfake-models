@@ -3,7 +3,7 @@ import os
 import pytest
 from google.cloud import storage
 
-from taxifare.params import *
+from dfake.params import *
 from tests.test_base import TestBase
 
 

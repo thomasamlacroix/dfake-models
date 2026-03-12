@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import mlflow
 
-from taxifare.params import *
+from dfake.params import *
 from tests.test_base import TestBase
 
 class TestMlflow(TestBase):

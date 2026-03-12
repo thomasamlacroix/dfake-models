@@ -5,3 +5,38 @@ pylint:
 
 pytest:
 	PYTHONDONTWRITEBYTECODE=1 pytest -v --color=yes
+
+
+# .DEFAULT_GOAL := default
+#################### PACKAGE ACTIONS ###################
+reinstall_package:
+	@pip uninstall -y dfake || :
+	@pip install -e .
+
+run_train:
+	python -c 'from taxifare.interface.main import train; train()'
+
+run_pred:
+	python -c 'from taxifare.interface.main import pred; pred()'
+
+run_evaluate:
+	python -c 'from taxifare.interface.main import evaluate; evaluate()'
+
+run_all: run_train run_pred run_evaluate
+
+
+##################### TESTS #####################
+test_gcp_setup:
+	@pytest \
+	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_env \
+	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_path \
+	tests/all/test_gcp_setup.py::TestGcpSetup::test_code_get_project \
+
+# default:
+# 	cat tests/lifecycle/test_output.txt
+
+test_mlflow_config:
+	@pytest \
+	tests/lifecycle/test_mlflow.py::TestMlflow::test_model_target_is_mlflow \
+	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_experiment_is_not_null \
+	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_model_name_is_not_null
