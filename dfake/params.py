@@ -26,7 +26,7 @@ NUM_CHANNELS = 3
 SEED = 42
 LEARNING_RATE = 0.001
 PATIENCE = 5
-EPOCHS = 20
+EPOCHS = 1
 
 
 
@@ -35,7 +35,7 @@ EPOCHS = 20
 
 env_valid_options = dict(
     DATA_SIZE=["lightweight", "all"],
-    MODEL_TARGET=["local", "gcs"],   #, "mlflow"],
+    MODEL_TARGET=["local", "gcs"],
 )
 
 def validate_env_value(env, valid_options):

@@ -36,11 +36,11 @@ def save_model(model=None):
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
-    # # Save model locally
+    # Save model locally
     model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.joblib")
-    # model.save(model_path)
+    model.save(model_path)
 
-    # print("✅ Model saved locally")
+    print("✅ Model saved locally")
 
     if MODEL_TARGET == "gcs":
         model_filename = model_path.split("/")[-1] # e.g. "20230208-161047.joblib" for instance
@@ -65,32 +65,9 @@ def save_model(model=None):
 
 def load_model():
     """
-    Return a saved model:
-    - locally (latest one in alphabetical order)
-    - or from GCS (most recent one) if MODEL_TARGET=='gcs'
-
+    Return a saved model from GCS (most recent one)
     Return None (but do not Raise) if no model is found
     """
-
-    # if MODEL_TARGET == "local":
-    #     print(f"\nLoad latest model from local registry...")
-
-    #     # Get the latest model version name by the timestamp on disk
-    #     local_model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
-    #     local_model_paths = glob.glob(f"{local_model_directory}/*")
-
-    #     if not local_model_paths:
-    #         return None
-
-    #     most_recent_model_path_on_disk = sorted(local_model_paths)[-1]
-
-    #     print(f"\nLoad latest model from disk...")
-
-    #     latest_model = joblib.load(most_recent_model_path_on_disk)
-
-    #     print("✅ Model loaded from local disk")
-
-    #     return latest_model
 
     if MODEL_TARGET == "gcs":
         print(f"\nLoad latest model from GCS...")
