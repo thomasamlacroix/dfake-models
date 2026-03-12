@@ -26,11 +26,6 @@ run_all: run_train run_pred run_evaluate
 
 
 ##################### TESTS #####################
-test_main:
-	@pytest \
-	tests/test_main.py::TestMain::test_route_evaluate \
-	tests/test_main.py::TestMain::test_route_pred \
-
 
 test_gcp_setup:
 	@pytest \
