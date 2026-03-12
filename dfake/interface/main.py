@@ -36,7 +36,6 @@ def train(learning_rate=LEARNING_RATE,
     #Lightweight dataset
     train_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "train")
     val_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "valid")
-    test_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "test")
 
 
     #Load data
@@ -57,13 +56,7 @@ def train(learning_rate=LEARNING_RATE,
     image_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE)
 
-    test_ds = image_dataset_from_directory(
-    test_data_dir,
-    labels="inferred",
-    label_mode="binary",
-    seed=SEED,
-    image_size=IMAGE_SIZE,
-    batch_size=BATCH_SIZE)
+
 
 
     # Train model using `model.py`
@@ -104,79 +97,59 @@ def train(learning_rate=LEARNING_RATE,
 
     print("✅ train() done \n")
 
-    return val_mae
+    return val_accuracy, val_recall, val_precision
 
 
-def evaluate(
-        min_date:str = '2014-01-01',
-        max_date:str = '2015-01-01',
-        stage: str = "Production"
-    ) -> float:
+def evaluate():
     """
     Evaluate the performance of the model on test data
     Return accuracy, recall and precision as floats
     """
     print("\n⭐️ Use case: evaluate")
 
-    model = load_model(stage=stage)
+    model = load_model()
     assert model is not None
 
-    # Retrieve `query` data from BigQuery or from `data_query_cache_path` if the file already exists!
-    data_query_cache_path = Path(LOCAL_DATA_PATH).joinpath("processed", f"query_{min_date}_{max_date}_{DATA_SIZE}.csv")
-    data_processed = get_data_with_cache(GCP_PROJECT, query, data_query_cache_path)
+    test_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "test")
 
-    if data_processed.shape[0] == 0:
-        print("❌ No data to evaluate on")
-        return None
+    test_ds = image_dataset_from_directory(
+    test_data_dir,
+    labels="inferred",
+    label_mode="binary",
+    seed=SEED,
+    image_size=IMAGE_SIZE,
+    batch_size=BATCH_SIZE)
 
-    # data_processed = data_processed.to_numpy()
-
-    X_new = data_processed.iloc[:, 1:-1]
-    y_new = data_processed.iloc[:, -1]
-    print(X_new.shape)
-    print(y_new.shape)
-
-    metrics_dict = evaluate_model(model=model, X=X_new, y=y_new)
-    mae = metrics_dict["mae"]
+    metrics_dict = evaluate_model(model, test_ds)
+    accuracy = metrics_dict["accuracy"]
+    recall = metrics_dict["recall"]
+    precision = metrics_dict["precision"]
 
     params = dict(
         context="evaluate", # Package behavior
-        training_set_size=DATA_SIZE,
-        row_count=len(X_new)
+        training_set_size=DATA_SIZE
     )
 
     save_results(params=params, metrics=metrics_dict)
 
     print("✅ evaluate() done \n")
 
-    return mae
+    return accuracy, recall, precision
 
 
-def pred(X_pred: pd.DataFrame = None) -> np.ndarray:
+def pred(img = None):
     """
     Make a prediction using the latest trained model
     """
 
     print("\n⭐️ Use case: predict")
 
-    if X_pred is None:
-        X_pred = pd.DataFrame(dict(
-        pickup_datetime=[pd.Timestamp("2013-07-06 17:18:00", tz='UTC')],
-        pickup_longitude=[-73.950655],
-        pickup_latitude=[40.783282],
-        dropoff_longitude=[-73.984365],
-        dropoff_latitude=[40.769802],
-        passenger_count=[1],
-    ))
+    # model = load_model()
+    # assert model is not None
 
-    model = load_model()
-    assert model is not None
+    pass
 
-    X_processed = preprocess_features(X_pred)
-    y_pred = model.predict(X_processed)
-
-    print("\n✅ prediction done: ", y_pred, y_pred.shape, "\n")
-    return y_pred
+    # return
 
 
 if __name__ == '__main__':
