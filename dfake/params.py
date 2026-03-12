@@ -15,8 +15,8 @@ MLFLOW_MODEL_NAME = os.environ.get("MLFLOW_MODEL_NAME")
 # GAR_MEMORY = os.environ.get("GAR_MEMORY")
 
 ##################  CONSTANTS  #####################
-LOCAL_DATA_PATH = os.path.join(os.path.expanduser('..'), "data")
-LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('..'), "training_outputs")
+LOCAL_DATA_PATH = os.path.join(os.path.expanduser('.'), "data")
+LOCAL_REGISTRY_PATH =  os.path.join(os.path.expanduser('.'), "training_outputs")
 
 BATCH_SIZE = 128
 IMAGE_SIZE = (256, 256)

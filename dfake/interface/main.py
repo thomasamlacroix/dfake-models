@@ -13,7 +13,7 @@ from dfake.params import *
 from dfake.dl_logic.model import initialize_model, compile_model, train_model, evaluate_model
 from dfake.dl_logic.registry import load_model, save_model, save_results
 
-from google.cloud import storage
+# from google.cloud import storage
 
 
 def train(learning_rate=LEARNING_RATE,
