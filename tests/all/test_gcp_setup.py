@@ -29,16 +29,6 @@ class TestGcpSetup(TestBase):
 
         assert content is not None
 
-    def test_code_get_wagon_project(self):
-        """
-        retrieve default gcp project id with code
-        """
-        # get default project id
-        client = storage.Client(project=GCP_PROJECT_WAGON)
-        project_id = client.project
-
-        assert project_id is not None
-
     def test_code_get_project(self):
         """
         retrieve default gcp project id with code

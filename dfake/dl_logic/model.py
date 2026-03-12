@@ -67,6 +67,7 @@ def train_model(
         model,
         train_ds,
         patience=3,
+        epochs=10,
         validation_data=None, # overrides validation_split
         validation_split=0.3
     ):
@@ -88,7 +89,7 @@ def train_model(
 
 
     history = model.fit(train_ds,
-                    epochs=10,
+                    epochs=epochs,
                     validation_data=validation_data,
                     callbacks=[LRreducer, EarlyStopper],
                     verbose=1)
@@ -98,10 +99,7 @@ def train_model(
     return model, history
 
 
-def evaluate_model(model,
-                   test_ds,
-                   batch_size=128
-                   ):
+def evaluate_model(model, test_ds):
     """
     Evaluate trained model performance on the dataset
     """
@@ -114,9 +112,8 @@ def evaluate_model(model,
 
     evaluation = model.evaluate(
         test_ds,
-        batch_size=batch_size,
+        # batch_size=batch_size,
         verbose=0,
-        # callbacks=None,
         return_dict=True
         )
 

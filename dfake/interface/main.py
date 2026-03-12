@@ -58,9 +58,6 @@ def train(learning_rate=LEARNING_RATE,
     image_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE)
 
-
-
-
     # Train model using `model.py`
     input_shape = (IMAGE_HEIGHT, IMAGE_WIDTH, NUM_CHANNELS)
 

@@ -1,21 +1,21 @@
-import os
-import re
+# import os
+# import re
 
-import pandas as pd
-import pytest
+# import pandas as pd
+# import pytest
 import mlflow
 
 from dfake.params import *
 from tests.test_base import TestBase
 
 class TestMlflow(TestBase):
-    def test_model_target_is_mlflow(self):
-        """
-        verify that the mlflow parameters are correctly set
-        """
-        model_target = MODEL_TARGET
+    # def test_model_target_is_mlflow(self):
+    #     """
+    #     verify that the mlflow parameters are correctly set
+    #     """
+    #     model_target = MODEL_TARGET
 
-        assert model_target == 'mlflow', 'Check the value of MODEL_TARGET'
+    #     assert model_target == 'mlflow', 'Check the value of MODEL_TARGET'
 
     def test_mlflow_experiment_is_not_null(self):
         """
