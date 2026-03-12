@@ -32,6 +32,8 @@ test_gcp_setup:
 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_env \
 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_path \
 	tests/all/test_gcp_setup.py::TestGcpSetup::test_code_get_project \
+	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_project_id \
+	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_bucket_name
 
 # default:
 # 	cat tests/lifecycle/test_output.txt

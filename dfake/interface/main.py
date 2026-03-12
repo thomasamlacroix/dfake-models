@@ -91,7 +91,7 @@ def train(learning_rate=LEARNING_RATE,
                                              recall=val_recall,
                                              precision=val_precision))
 
-    # Save model weight on the hard drive and on GCS
+    # Save model weights on GCS
     save_model(model=model)
 
     print("✅ train() done \n")
