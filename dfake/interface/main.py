@@ -4,7 +4,7 @@
 from pathlib import Path
 # from colorama import Fore, Style
 
-from keras.utils import image_dataset_from_directory
+from keras.utils import image_dataset_from_directory, img_to_array
 
 #Pretrained model for transfer learning
 from keras.applications.efficientnet import EfficientNetB3, preprocess_input
@@ -14,6 +14,8 @@ from dfake.dl_logic.model import initialize_model, compile_model, train_model, e
 from dfake.dl_logic.registry import load_model, save_model, save_results
 
 # from google.cloud import storage
+
+from PIL import Image
 
 
 def train(learning_rate=LEARNING_RATE,
@@ -122,8 +124,8 @@ def evaluate():
 
     metrics_dict = evaluate_model(model, test_ds)
     accuracy = metrics_dict["accuracy"]
-    recall = metrics_dict["recall"]
-    precision = metrics_dict["precision"]
+    # recall = metrics_dict["recall"]
+    # precision = metrics_dict["precision"]
 
     params = dict(
         context="evaluate", # Package behavior
@@ -134,7 +136,7 @@ def evaluate():
 
     print("✅ evaluate() done \n")
 
-    return accuracy, recall, precision
+    return accuracy   #, recall, precision
 
 
 def pred(img = None):
@@ -144,12 +146,27 @@ def pred(img = None):
 
     print("\n⭐️ Use case: predict")
 
-    # model = load_model()
-    # assert model is not None
+    model = load_model()
+    assert model is not None
 
-    pass
+    if img == None:
+        img_path = './data/lightweight/test/fake/0A266M95TD.jpg'
+        image = Image.open(img_path)
+    # image = resize_image(image)
 
-    # return
+    X_pred = img_to_array(image)
+
+    shape = X_pred.shape
+
+    shape = (-1,) + shape
+    print(shape)
+
+    X_pred = X_pred.reshape(shape)
+    y_pred = model.predict(X_pred)
+
+    print(y_pred)
+
+    return y_pred
 
 
 if __name__ == '__main__':

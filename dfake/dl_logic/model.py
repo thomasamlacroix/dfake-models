@@ -121,12 +121,12 @@ def evaluate_model(model,
         )
 
     accuracy = evaluation["accuracy"]
-    recall = evaluation["recall"]
-    precision = evaluation["precision"]
+    # recall = evaluation["recall"]
+    # precision = evaluation["precision"]
 
     print("✅ Model evaluated")
     print(f"Accuracy: {round(accuracy, 2)}")
-    print(f"Recall: {round(recall, 2)}")
-    print(f"Precision: {round(precision, 2)}")
+    # print(f"Recall: {round(recall, 2)}")
+    # print(f"Precision: {round(precision, 2)}")
 
     return evaluation

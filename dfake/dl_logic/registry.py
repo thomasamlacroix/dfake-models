@@ -91,7 +91,13 @@ def load_model():
             return None
 
     else:
-        return None
+
+        model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", "baseline.joblib")
+        model = joblib.load(model_path)
+
+        return model
+
+        # return None
 
 
 
