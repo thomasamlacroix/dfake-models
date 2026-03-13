@@ -27,13 +27,13 @@ run_all: run_train run_pred run_evaluate
 
 ##################### TESTS #####################
 
-test_gcp_setup:
-	@pytest \
-	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_env \
-	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_path \
-	tests/all/test_gcp_setup.py::TestGcpSetup::test_code_get_project \
-	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_project_id \
-	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_bucket_name
+# test_gcp_setup:
+# 	@pytest \
+# 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_env \
+# 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_key_path \
+# 	tests/all/test_gcp_setup.py::TestGcpSetup::test_code_get_project \
+# 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_project_id \
+# 	tests/all/test_gcp_setup.py::TestGcpSetup::test_setup_bucket_name
 
 # default:
 # 	cat tests/lifecycle/test_output.txt

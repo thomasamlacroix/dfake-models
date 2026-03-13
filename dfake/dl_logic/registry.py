@@ -36,17 +36,17 @@ def save_model(model=None):
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
     # Save model locally
-    model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.joblib")
-    model.save(model_path)
+    # model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", f"{timestamp}.joblib")
+    # model.save(model_path)
 
-    print("✅ Model saved locally")
+    # print("✅ Model saved locally")
 
     if MODEL_TARGET == "gcs":
-        model_filename = model_path.split("/")[-1] # e.g. "20230208-161047.joblib" for instance
+        model_filename = os.path.join("model", {DATA_SIZE}, f"{timestamp}.joblib")     #model_path.split("/")[-1] # e.g. "20230208-161047.joblib" for instance
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"models/{model_filename}")
-        blob.upload_from_filename(model_path)
+        blob.upload_from_filename(model_filename)   #model_path)
 
         print("✅ Model saved to GCS")
         return None
@@ -96,7 +96,7 @@ def load_model():
 
         return model
 
-        # return None
+        return None
 
 
 

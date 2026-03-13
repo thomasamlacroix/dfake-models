@@ -13,7 +13,7 @@ from dfake.params import *
 from dfake.dl_logic.model import initialize_model, compile_model, train_model, evaluate_model
 from dfake.dl_logic.registry import load_model, save_model, save_results
 
-# from google.cloud import storage
+from google.cloud import storage
 
 from PIL import Image
 
@@ -32,12 +32,13 @@ def train(learning_rate=LEARNING_RATE,
     print("\nLoading preprocessed validation data...")
 
 
-    # client = storage.Client()
-    # bucket = client.bucket(BUCKET_NAME)
-    # blob = bucket.blob(f"models/{model_filename}")
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+    train_data_dir = bucket.blob(f"data/{DATA_SIZE}/train")
+    val_data_dir = bucket.blob(f"data/{DATA_SIZE}/valid")
     #Lightweight dataset
-    train_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "train")
-    val_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "valid")
+    # train_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "train")
+    # val_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "valid")
 
 
     #Load data
@@ -109,7 +110,12 @@ def evaluate():
     model = load_model()
     assert model is not None
 
-    test_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "test")
+    client = storage.Client()
+    bucket = client.bucket(BUCKET_NAME)
+    test_data_dir = bucket.blob(f"data/{DATA_SIZE}/test")
+
+    # test_data_dir = Path(LOCAL_DATA_PATH).joinpath(f"{DATA_SIZE}", "test")
+
 
     test_ds = image_dataset_from_directory(
     test_data_dir,
