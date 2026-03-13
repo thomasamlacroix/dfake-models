@@ -5,6 +5,8 @@ training_outputs/
 
 .env
 
+mlflow.db
+
 # OS generated files #
 ######################
 .DS_Store
