@@ -38,7 +38,7 @@ run_all: run_train run_pred run_evaluate
 # default:
 # 	cat tests/lifecycle/test_output.txt
 
-test_mlflow_config:
-	@pytest \
-	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_experiment_is_not_null \
-	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_model_name_is_not_null
+# test_mlflow_config:
+# 	@pytest \
+# 	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_experiment_is_not_null \
+# 	tests/lifecycle/test_mlflow.py::TestMlflow::test_mlflow_model_name_is_not_null
